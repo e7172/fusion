@@ -106,6 +106,7 @@ def apply_args(args : Args, apply_state_item : ApplyStateItem) -> None:
 		output_video_fps = normalize_fps(args.get('output_video_fps')) or detect_video_fps(args.get('target_path'))
 		apply_state_item('output_video_fps', output_video_fps)
 	apply_state_item('skip_audio', args.get('skip_audio'))
+	apply_state_item('output_video_watermark', args.get('output_video_watermark'))
 	# processors
 	available_processors = [ file.get('name') for file in list_directory('facefusion/processors/modules') ]
 	apply_state_item('processors', args.get('processors'))

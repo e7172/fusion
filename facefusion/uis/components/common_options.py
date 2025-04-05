@@ -32,5 +32,7 @@ def listen() -> None:
 def update(common_options : List[str]) -> None:
 	keep_temp = 'keep-temp' in common_options
 	skip_audio = 'skip-audio' in common_options
+	output_video_watermark = 'output-video-watermark' in common_options
 	state_manager.set_item('keep_temp', keep_temp)
 	state_manager.set_item('skip_audio', skip_audio)
+	state_manager.set_item('output_video_watermark', output_video_watermark)

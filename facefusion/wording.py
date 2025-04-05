@@ -147,7 +147,7 @@ WORDING : Dict[str, Any] =\
 		'output_video_resolution': 'specify the video output resolution based on the target video',
 		'output_video_fps': 'specify the video output fps based on the target video',
 		'skip_audio': 'omit the audio from the target video',
-		# processors
+		'output_video_watermark': 'add a watermark to the output video',			
 		'processors': 'load a single or multiple processors (choices: {choices}, ...)',
 		'age_modifier_model': 'choose the model responsible for aging the face',
 		'age_modifier_direction': 'specify the direction in which the age should be modified',
