@@ -103,9 +103,6 @@ def merge_video(target_path : str, output_video_resolution : str, output_video_f
 	merge_frame_total = len(get_temp_frame_paths(target_path))
 	temp_video_fps = restrict_video_fps(target_path, output_video_fps)
 	temp_file_path = get_temp_file_path(target_path)
-	padding = 10
-	watermark = os.path.join(os.path.dirname(os.path.abspath(__file__)), "watermark.png")
-	overlay_filter = f"[0:v][1:v]overlay=W-w-{padding}:H-h-{padding}"
 	
 	if not os.path.splitext(temp_file_path)[1]: temp_file_path += '.mp4'
 
@@ -116,13 +113,14 @@ def merge_video(target_path : str, output_video_resolution : str, output_video_f
 		output_video_encoder = 'libvpx-vp9'
 	
 	# Base commands without watermark
+	commands = [ '-r', str(temp_video_fps), '-i', temp_frames_pattern, '-s', str(output_video_resolution), '-c:v', output_video_encoder ]
+	
+	# Add watermark input only if watermark is enabled
 	if output_video_watermark:
-		commands = [ '-r', str(temp_video_fps), '-i', temp_frames_pattern, '-i', watermark, '-s', str(output_video_resolution), '-c:v', output_video_encoder ]
-	else:
-		commands = [ '-r', str(temp_video_fps), '-i', temp_frames_pattern, '-s', str(output_video_resolution), '-c:v', output_video_encoder ]
-	# # Add watermark input only if watermark is enabled
-	# if output_video_watermark:
-	# 	commands.extend(['-i', watermark])
+		padding = 10
+		watermark = os.path.join(os.path.dirname(os.path.abspath(__file__)), "watermark.png")
+		overlay_filter = f"[0:v][1:v]overlay=W-w-{padding}:H-h-{padding}"
+		commands.extend(['-i', watermark])
 	
 	if output_video_encoder in [ 'libx264', 'libx265' ]:
 		output_video_compression = round(51 - (output_video_quality * 0.51))
@@ -139,7 +137,11 @@ def merge_video(target_path : str, output_video_resolution : str, output_video_f
 	if output_video_encoder in [ 'h264_videotoolbox', 'hevc_videotoolbox' ]:
 		commands.extend([ '-q:v', str(output_video_quality) ])
   
-	commands.extend([ '-filter_complex', overlay_filter, '-pix_fmt', 'yuv420p', '-colorspace', 'bt709', '-y', temp_file_path ])
+	# Apply filter for watermark only if enabled
+	if output_video_watermark:
+		commands.extend([ '-filter_complex', overlay_filter, '-pix_fmt', 'yuv420p', '-colorspace', 'bt709', '-y', temp_file_path ])
+	else:
+		commands.extend([ '-pix_fmt', 'yuv420p', '-colorspace', 'bt709', '-y', temp_file_path ])
 	
 	# Log the FFmpeg command for debugging
 	print(f"Executing FFmpeg command: {' '.join(commands)}")
