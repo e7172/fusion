@@ -74,6 +74,8 @@ def analyse_stream(vision_frame : VisionFrame, video_fps : Fps) -> bool:
 
 
 def analyse_frame(vision_frame : VisionFrame) -> bool:
+	if vision_frame is None:
+		return False
 	vision_frame = prepare_frame(vision_frame)
 	probability = forward(vision_frame)
 
@@ -95,6 +97,11 @@ def forward(vision_frame : VisionFrame) -> float:
 def prepare_frame(vision_frame : VisionFrame) -> VisionFrame:
 	model_size = get_model_options().get('size')
 	model_mean = get_model_options().get('mean')
+	if vision_frame is None or vision_frame.size == 0:
+		# Return a placeholder frame with the right shape to avoid resize errors
+		placeholder = numpy.zeros((model_size[1], model_size[0], 3), dtype=numpy.float32)
+		placeholder = numpy.expand_dims(placeholder, axis=0)
+		return placeholder
 	vision_frame = cv2.resize(vision_frame, model_size).astype(numpy.float32)
 	vision_frame -= numpy.array(model_mean).astype(numpy.float32)
 	vision_frame = numpy.expand_dims(vision_frame, axis = 0)
@@ -118,7 +125,7 @@ def analyse_video(video_path : str, trim_frame_start : int, trim_frame_end : int
 		for frame_number in frame_range:
 			if frame_number % int(video_fps) == 0:
 				vision_frame = get_video_frame(video_path, frame_number)
-				if analyse_frame(vision_frame):
+				if vision_frame is not None and analyse_frame(vision_frame):
 					counter += 1
 			rate = counter * int(video_fps) / len(frame_range) * 100
 			progress.update()
